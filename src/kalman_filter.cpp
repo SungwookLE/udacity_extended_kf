@@ -82,11 +82,11 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   float phi = atan2(py, px);
   float rho_dot=0;
 
-  if (fabs(rho_dot) < 0.0001){
+  if (fabs(rho) < 0.0001){
     rho_dot = 0;
   }
   else{
-    rho_dot = (2 * px * vx + 2 * py * vy) / rho;
+    rho_dot = ( px * vx + py * vy) / rho;
   }
 
   Eigen::VectorXd z_pred = Eigen::VectorXd(3);

@@ -94,15 +94,17 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
     // first measurement
     cout << "EKF: " << endl;
-    ekf_.x_ = VectorXd(4);
-    ekf_.x_ << 0, 0, 0, 0;
+    ekf_.x_(0) = 0;
+    ekf_.x_(1) = 0;
+    ekf_.x_(2) = 0; 
+    ekf_.x_(3) = 0;
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       // TODO: Convert radar from polar to cartesian coordinates 
       //         and initialize state.
       ekf_.x_(0) = measurement_pack.raw_measurements_(0) * cos(measurement_pack.raw_measurements_(1));
       ekf_.x_(1) = measurement_pack.raw_measurements_(0) * sin(measurement_pack.raw_measurements_(1));
-      ekf_.x_(2) = measurement_pack.raw_measurements_(2) * sin(measurement_pack.raw_measurements_(1));
+      ekf_.x_(2) = measurement_pack.raw_measurements_(2) * cos(measurement_pack.raw_measurements_(1));
       ekf_.x_(3) = measurement_pack.raw_measurements_(2) * sin(measurement_pack.raw_measurements_(1));
     }
     else if (measurement_pack.sensor_type_ == MeasurementPackage::LASER) {
@@ -113,6 +115,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       ekf_.x_(3) = 0;
     }
 
+    previous_timestamp_ = measurement_pack.timestamp_;
     // done initializing, no need to predict or update
     is_initialized_ = true;
     return;
@@ -129,10 +132,11 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
    * Use noise_ax = 9 and noise_ay = 9 for your Q matrix.
    */
   
-
-  float dt;
-  dt = (measurement_pack.timestamp_ - previous_timestamp_)/1000000; // 0.1s
   
+  float dt;
+  dt = (measurement_pack.timestamp_ - previous_timestamp_)/1000000.0; // 
+  previous_timestamp_ = measurement_pack.timestamp_;
+
   ekf_.F_(0, 2) = dt;
   ekf_.F_(1, 3) = dt;
 
@@ -162,7 +166,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
    */
 
   if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
-    std::cout << "Radar!"<< std::endl;
+    std::cout << "Radar:"<< std::endl;
     // TODO: Radar updates
     Tools tools;
     Hj_ = tools.CalculateJacobian(ekf_.x_);
@@ -172,7 +176,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     // 내 허브에 커밋하고 마무리 ㄲ 
     
   } else {
-    std::cout << "Lidar!"<< std::endl;
+    std::cout << "Lidar:"<< std::endl;
     // TODO: Laser updates
     ekf_.Init(ekf_.x_, ekf_.P_, ekf_.F_, H_laser_, R_laser_, ekf_.Q_);
     ekf_.Update(measurement_pack.raw_measurements_);

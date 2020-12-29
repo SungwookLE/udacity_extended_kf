@@ -22,9 +22,10 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
      Eigen::VectorXd error_square = VectorXd(4);
      
      error_square << 0, 0, 0, 0;
+     //std::cout << "SIZE: " << estimations.size() << std::endl;
      for (int i; i < estimations.size(); ++i)
      {
-        error_square = (estimations.at(i) - ground_truth.at(i)).array() * (estimations.at(i) - ground_truth.at(i)).array();
+        error_square = (estimations.at(i) - ground_truth.at(i)).array()* (estimations.at(i) - ground_truth.at(i)).array();
         RMSE += error_square;
      }
      RMSE = RMSE / estimations.size();
@@ -55,7 +56,7 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
          Hj(i, j) = 0;
       }
    }
-   std::cout << " D" << std::endl;
+   
    float px = x_state(0);
    float py = x_state(1);
    float vx = x_state(2);
@@ -66,20 +67,26 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
    float c2 = sqrt(c1);
    float c3 = (c1*c2);
    // check division by zero
-   if (fabs(c1) < 0.0001 || fabs(c2) < 0.0001 || fabs(c3) < 0.0001) {
-    return Hj;
+   if (fabs(c1) < 0.0001 ) {
+      std::cout << "Jacobian Alert: divide by zero!" << std::endl;
+      return Hj;
    }
-
+   // Hj = Eigen::MatrixXd(3, 4);
    // Hj(0, 0) = px / sqrt(px * px + py * py);
-   // Hj(0,1)=  py  / sqrt(px*px + py*py);
-   // Hj(1,0)= -py  / (px*px + py*py);
-   // Hj(1,1)=  px  / (px*px + py*py);
-   // Hj(2,0)=  py  * (vx*py-vy*px) / pow((px*px+py*py),1.5);
-   // Hj(2,1)=  px  * (vy*px-vx*py) / pow((px*px+py*py),1.5);
-   // Hj(2,2)=  px  / sqrt(px*px+py*py);
-   // Hj(2,3)=  Hj(0,1);
+   // Hj(0, 1)=  py  / sqrt(px*px + py*py);
+   // Hj(0, 2) = 0;
+   // Hj(0, 3) = 0;
 
-   // compute the Jacobian matrix
+   // Hj(1, 0) = -py / (px * px + py * py);
+   // Hj(1, 1)=  px  / (px*px + py*py);
+   // Hj(1, 2) = 0;
+   // Hj(1, 3) = 0;
+   // Hj(2, 0)=  py  * (vx*py-vy*px) / pow((px*px+py*py),1.5);
+   // Hj(2, 1)=  px  * (vy*px-vx*py) / pow((px*px+py*py),1.5);
+   // Hj(2, 2)=  px  / sqrt(px*px+py*py);
+   // Hj(2, 3)=  Hj(0,1);
+
+   //compute the Jacobian matrix
    Hj << (px/c2), (py/c2), 0, 0,
       -(py/c1), (px/c1), 0, 0,
       py*(vx*py - vy*px)/c3, px*(px*vy - py*vx)/c3, px/c2, py/c2;
