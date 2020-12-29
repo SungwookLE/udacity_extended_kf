@@ -25,7 +25,7 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
      //std::cout << "SIZE: " << estimations.size() << std::endl;
      for (int i; i < estimations.size(); ++i)
      {
-        error_square = (estimations.at(i) - ground_truth.at(i)).array()* (estimations.at(i) - ground_truth.at(i)).array();
+        error_square = (estimations.at(i) - ground_truth.at(i)).array()* (estimations.at(i) - ground_truth.at(i)).array(); //array() 는 벡터 연산에서 요소끼리의 곱을 하게 해주는 것 (1,1) * (1,1)
         RMSE += error_square;
      }
      RMSE = RMSE / estimations.size();
@@ -40,15 +40,6 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
    * TODO:
    * Calculate a Jacobian here.
    *     
-    Hj(0,0)=  px  / sqrt(px*px + py*py);
-    Hj(0,1)=  py  / sqrt(px*px + py*py);
-    Hj(1,0)= -py  / (px*px + py*py);
-    Hj(1,1)=  px  / (px*px + py*py);
-    Hj(2,0)=  py  * (vx*py-vy*px) / pow((px*px+py*py),1.5);
-    Hj(2,1)=  px  * (vy*px-vx*py) / pow((px*px+py*py),1.5);
-    Hj(2,2)=  px  / sqrt(px*px+py*py);
-    Hj(2,3)=  Hj(0,1);
-      Where, px,py are position state and vx,vy are velocity state.
    */
    Eigen::MatrixXd Hj = Eigen::MatrixXd(3, 4);
    for (int i = 0; i < 3; ++i){
@@ -68,7 +59,7 @@ MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
    float c3 = (c1*c2);
    // check division by zero
    if (fabs(c1) < 0.0001 ) {
-      std::cout << "Jacobian Alert: divide by zero!" << std::endl;
+      std::cout << "divide by zero defense!" << std::endl;
       return Hj;
    }
    // Hj = Eigen::MatrixXd(3, 4);

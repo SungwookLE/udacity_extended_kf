@@ -83,6 +83,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
   float rho_dot=0;
 
   if (fabs(rho) < 0.0001){
+    std::cout << "divide by zero defense!" << std::endl;
     rho_dot = 0;
   }
   else{

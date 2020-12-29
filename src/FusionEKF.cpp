@@ -56,7 +56,7 @@ FusionEKF::FusionEKF() {
   ekf_.Q_ << 0, 0, 0, 0,
              0, 0, 0, 0,
              0, 0, 0, 0,
-             0, 0, 0, 0;
+             0, 0, 0, 0; // initialization value set zero matrix
   std::cout << "Q(process noise covariance matrix) is initialized!" << std::endl;
 
   H_laser_ << 1, 0, 0, 0,
@@ -64,7 +64,7 @@ FusionEKF::FusionEKF() {
 
   Hj_ << 0, 0, 0, 0,
          0, 0, 0, 0,
-         0, 0, 0, 0; // 맞나 ? 자코비언을 이니셜라이제이션 단계에서는 할 수가 없으니, 0 넣어 두어야 겠는데, 맞겠지? (12/28)
+         0, 0, 0, 0; // initialization value set zero matrix
 
   //measurement covariance matrix - laser
   R_laser_ << 0.0225, 0,
@@ -115,7 +115,7 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
       ekf_.x_(3) = 0;
     }
 
-    previous_timestamp_ = measurement_pack.timestamp_;
+    previous_timestamp_ = measurement_pack.timestamp_; // 이부분 뺴먹어서 발산에러 났던 것.
     // done initializing, no need to predict or update
     is_initialized_ = true;
     return;
@@ -124,7 +124,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
   /**
    * Prediction
    */
-
   /**
    * TODO: Update the state transition matrix F according to the new elapsed time.
    * Time is measured in seconds.
@@ -132,10 +131,9 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
    * Use noise_ax = 9 and noise_ay = 9 for your Q matrix.
    */
   
-  
   float dt;
-  dt = (measurement_pack.timestamp_ - previous_timestamp_)/1000000.0; // 
-  previous_timestamp_ = measurement_pack.timestamp_;
+  dt = (measurement_pack.timestamp_ - previous_timestamp_)/1000000.0; // (12/29) 이부분이 은근 중요한게.. float 는 float/int 해선 안됨 . 이전까지 (float)/1000000 여서 성능 안나왔던 것 
+  previous_timestamp_ = measurement_pack.timestamp_;// 이부분 뺴먹어서 발산에러 났던 것.
 
   ekf_.F_(0, 2) = dt;
   ekf_.F_(1, 3) = dt;
@@ -146,7 +144,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 
   float noise_ax = 9;
   float noise_ay = 9;
-
   
   ekf_.Q_ << dt_4 / 4 * noise_ax, 0, dt_3 / 2 * noise_ax, 0,
              0, dt_4 / 4 * noise_ay, 0, dt_3 / 2 * noise_ay,
@@ -172,8 +169,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     Hj_ = tools.CalculateJacobian(ekf_.x_);
     ekf_.Init(ekf_.x_, ekf_.P_, ekf_.F_, Hj_, R_radar_, ekf_.Q_);
     ekf_.UpdateEKF(measurement_pack.raw_measurements_);
-    // (12/28) 여기까지. 디버깅 중 매트릭스 사이즈 안맞아서 연산에러 나는 부분 해결 중 !! : 참고(ref): https://github.com/wolfgang-stefani/Extended-Kalman-Filter/blob/main/src/kalman_filter.cpp#L34
-    // 내 허브에 커밋하고 마무리 ㄲ 
     
   } else {
     std::cout << "Lidar:"<< std::endl;
