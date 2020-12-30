@@ -1,4 +1,4 @@
-# The Writeup This Project is [here](https://github.com/SungwookLE/udacity_extended_kf/edit/master/writeup.md)
+# The Writeup This Project is [here](https://github.com/SungwookLE/udacity_extended_kf/master/writeup.md)
 Author: SungwookLE
 Date: '20.12/30
 
