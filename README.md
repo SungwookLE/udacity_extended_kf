@@ -1,7 +1,7 @@
-# The Writeup This Project is [here](https://github.com/SungwookLE/udacity_extended_kf/master/writeup.md)
-Author: SungwookLE
-Date: '20.12/30
-
+# The Writeup This Project is [here](https://github.com/SungwookLE/udacity_extended_kf/blob/master/writeup.md)
+**Author: SungwookLE**<br/>
+**Date: '20.12/30**<br/>
+<br/>
 # Extended Kalman Filter Project Starter Code
 Self-Driving Car Engineer Nanodegree Program
 
