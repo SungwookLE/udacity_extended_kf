@@ -73,7 +73,7 @@ ekf_.Predict() is done. and Predict() member is written in "kalman_filter.cpp".
 In predict member, x_ is calcualted by F matrix product X vector **(i.e. x_ = F_ *X_+ u, where u is zero)**
 Additionally, Covariance P is updated by **P_ = F_ * P_ * F_.transpose() + Q_;**
 
-- Line 165~172:
+- Line 165 ~ 172:
 if Radar data is coming, as i said above, the H_radar is non-linear function and needed to be linearize.
 Therefore tools.CalculateJacobian(ekf_.X_) is calculating jacobian at point x.
 And set the ekf_ matirx using ekf_.Init(), and call the **ekf_.UpdateEKF(measurement_pack.raw_measurements_)**
@@ -81,7 +81,7 @@ Let's look at the UpdateEKF memeber in "kalman_filter.cpp".
 in line 81~115, px, py, vx, vy are converted to rho, phi, rho_dot.
 and phi set in range from **'-pi to +pi'**
 
-in line 117~121, kalman processing is implemented for radar processing.
+In line 117~121, kalman processing is implemented for radar processing.
 
 >>>	Eigen::MatrixXd S = H_ * P_ * H_.transpose() + R_; // 3x3
 >>>	Eigen::MatrixXd K = P_ * H_.transpose() * S.inverse(); // 4x4 * 4x3 * x 3x3 = 4x3
