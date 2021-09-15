@@ -1,10 +1,12 @@
-# Extended Kalman Filter Project Starter Code
+# Extended Kalman Filter Project
 
 > Author: SungwookLE  
  DATE: '21.9/14  
  Comment: Radar+Lidar Sensor Fusion Project on Udacity(Self-Driving Car Engineer Nanodegree Program)  
 
 In this project you will utilize a kalman filter to estimate the state of a moving object(`pedestrian`) of interest with noisy **lidar and radar** measurements. Passing the project requires obtaining RMSE values that are lower than the tolerance outlined in the project rubric. 
+
+**Assumption**: Single and Same Target Information would be continuously received
 
 ---
 
@@ -28,7 +30,7 @@ In this project you will utilize a kalman filter to estimate the state of a movi
 3. Run it: `./ExtendedKF `
 
 ## 4. Introduction
-### 4-1. Input/Output Description  
+### 4-1. In/Out Description  
  1) **INPUT**: values provided by the simulator to the c++ program  
 - ["sensor_measurement"] => the measurement that the simulator observed (either lidar or radar)
 - 1-1) Lidar Data
@@ -41,7 +43,7 @@ In this project you will utilize a kalman filter to estimate the state of a movi
 보이다시피, 현재 시점의 $\mu$값을 기준으로 선형화를 해야한다. : `perturbation`.  
 현재 시점이 0이라고 했을 때 h(x) = arctan(x) 의 테일러 1차 전개를 이용한 선형화 [예시](assets/linearization_example.png).
 
- 2) **OUTPUT**: values provided by the c++ program to the simulator  
+ 2) **OUTPUT**: values provided by the c++ program to the **simulator** 
 - ["estimate_x"] <= kalman filter estimated position x
 - ["estimate_y"] <= kalman filter estimated position y
 - ["rmse_x"]
@@ -49,9 +51,7 @@ In this project you will utilize a kalman filter to estimate the state of a movi
 - ["rmse_vx"]
 - ["rmse_vy"]
 
-### 4-2. Sensor Fusion Flow Diagram
-
-![image](https://video.udacity-data.com/topher/2017/February/58b4d902_screenshot-from-2017-02-27-19-56-58/screenshot-from-2017-02-27-19-56-58.png)
+### 4-2. Sensor Fusion Flow
 
 - The car will receive another sensor measurement after a time period Δt. The algorithm then does another **predict and update** step.
 ![image](assets/kalman_filter_flow.png)
@@ -73,5 +73,30 @@ In this project you will utilize a kalman filter to estimate the state of a movi
   - to calculate `y`, the $h$ function is used instead of the H matrix.
   - **One important point to reiterate is that the equation $y = z - Hx'$ for the Kalman filter does not become $y = z - H_jx$ for the extended Kalman filter. Instead, for extended Kalman filters, we'll use the $h$ function directly to map predicted locations $x'$ from Cartesian to polar coordinates.**
 
-  ## 5. Implementation
-  
+## 5. Implementation
+
+- *단일/동일 Target(`pedestrian`)에 대한 트래킹 정보를 지속적으로 수신*한다는 가정하에 센서 퓨전 프로젝트 구성
+- `main.cpp`에서는 `uWebSocket` 객체를 이용하여 Simulator와 통신하고 결과(RMSE)를 Simulator에 띄워준다.
+- `main.cpp` 안에서 fusionEKF 에 대한 객체를 생성하여 `predict, update` member 함수를 포함한 센서퓨전 기능을 구현한다.
+- [Flow_diagram](assets/kalman_filter_flow.png)의 구조와 동일하게 `fusionEKF.ProcessMeasurement(meas_package);`를 실행함으로써 predict와 update가 돌아가게 된다.
+- 이 때, Radar는 {radial distance, degree, radial velocity}가 출력되므로, state인 {position x, position y, velocity x, velocity y}를 가지고 동일한 output value를 만들어 주어야 하고 이 과정에서 `H mtx`가 선형이 아닌 비선형 함수로 구성되게 된다.
+- 이를 매 순간, Jacobian 1차 선형화를 해줌으로써 Radar 모델에 대한 선형화를 해주었다.  
+**`It is called Extended KF`**.
+```c++
+if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
+    // Radar updates
+    Hj_ = tools.CalculateJacobian(ekf_.x_); //Linearization
+    ekf_.Init(ekf_.x_, ekf_.P_,ekf_.F_, Hj_, R_radar_, ekf_.Q_ );
+    ekf_.UpdateEKF(measurement_pack.raw_measurements_);
+} 
+```
+
+### 5-1. main 구조
+
+### 5-2. FusionEKF fusionEKF 객체 구조
+
+### 5-3. KalmanFilter ekf_ 객체 구조
+
+## 6. Conclusion
+
+## 끝
